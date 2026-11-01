@@ -1,0 +1,62 @@
+<div class="mt-8 space-y-4">
+  <!-- Live Dispatch Result Box (Dynamic) -->
+  <div id="liveResultBox" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl transition-all">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <span id="liveResultIcon" class="text-emerald-400 text-lg"><i class="fa-solid fa-circle-check"></i></span>
+        <h3 id="liveResultTitle" class="text-sm font-bold text-white">Publish Results</h3>
+      </div>
+      <button onclick="document.getElementById('liveResultBox').classList.add('hidden')" class="text-slate-400 hover:text-white text-xs">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div id="liveResultBadges" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3"></div>
+  </div>
+
+  <!-- Recent Post Activity -->
+  <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-xs font-semibold text-slate-300 uppercase">Recent Studio Activity</h3>
+      <span class="text-[11px] text-slate-500">Last {{ recent_posts|length }} dispatches</span>
+    </div>
+
+    {% if recent_posts %}
+    <div class="space-y-3">
+      {% for post in recent_posts %}
+      <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400">
+            {% if post.media_type == 'video' %}<i class="fa-solid fa-video text-indigo-400"></i>
+            {% else %}<i class="fa-solid fa-image text-emerald-400"></i>{% endif %}
+          </div>
+          <div>
+            <div class="font-medium text-slate-200 line-clamp-1 max-w-xs sm:max-w-md">
+              {{ post.master_caption or '(No caption)' }}
+            </div>
+            <div class="text-[10px] text-slate-500 font-mono">{{ post.created_at }}</div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          {% for log in post.logs %}
+          <div class="px-2 py-1 rounded-md text-[10px] flex items-center gap-1.5 border {% if log.status == 'success' %}bg-emerald-500/10 text-emerald-300 border-emerald-500/20{% else %}bg-rose-500/10 text-rose-300 border-rose-500/20{% endif %}">
+            <span class="capitalize font-semibold">{{ log.platform }}</span>
+            {% if log.status == 'success' %}
+            <i class="fa-solid fa-check text-[9px]"></i>
+            {% else %}
+            <i class="fa-solid fa-triangle-exclamation text-[9px]" title="{{ log.error_message }}"></i>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-6 text-xs text-slate-500">
+      No posts dispatched yet. Connect accounts and create your first multi-platform reel above!
+    </div>
+    {% endif %}
+  </div>
+</div>
+

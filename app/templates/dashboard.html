@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Content Studio One-Click Publisher{% endblock %}
+
+{% block content %}
+<div class="flex-1 flex flex-col justify-start">
+  <!-- Top: Social Accounts Status Bar -->
+  {% include "partials/accounts_bar.html" %}
+
+  <!-- Center: Composer (Media + Captions + Hashtags + One Click Button) -->
+  {% include "partials/composer.html" %}
+
+  <!-- Bottom: Live Results & Activity History -->
+  {% include "partials/history.html" %}
+
+  <!-- Connect Account Modal -->
+  {% include "partials/connect_modal.html" %}
+</div>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
+

@@ -1,0 +1,97 @@
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+  <!-- Left Column: Media Uploader & Master Caption -->
+  <div class="lg:col-span-5 space-y-4">
+    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+      <label class="block text-xs font-semibold text-slate-300 uppercase mb-2">1. Media Asset (Reel / Video / Image)</label>
+      
+      <div id="dropzone" onclick="document.getElementById('mediaInput').click();" class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer transition bg-slate-950/40 relative min-h-[220px]">
+        <input type="file" id="mediaInput" name="media_file" accept="video/mp4,video/quicktime,video/webm,image/*" class="hidden">
+        
+        <div id="uploadPrompt" class="text-center">
+          <div class="h-12 w-12 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto mb-3">
+            <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
+          </div>
+          <p class="text-xs font-medium text-slate-200 mb-1">Click to browse or drag reel/image</p>
+          <p class="text-[11px] text-slate-500">MP4, MOV, WebM (Reels) or JPG, PNG</p>
+        </div>
+
+        <div id="mediaPreviewContainer" class="hidden w-full flex flex-col items-center">
+          <video id="videoPreview" controls class="hidden max-h-56 rounded-lg w-full object-contain bg-black"></video>
+          <img id="imagePreview" class="hidden max-h-56 rounded-lg w-full object-contain bg-black" />
+          <span id="fileNameBadge" class="mt-2 text-xs font-mono text-indigo-400 truncate max-w-full"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Master Caption -->
+    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+      <div class="flex items-center justify-between mb-1.5">
+        <label class="block text-xs font-semibold text-slate-300 uppercase">2. Master Caption</label>
+        <span class="text-[10px] text-slate-500">Auto-applies to all platforms unless customized</span>
+      </div>
+      <textarea id="masterCaption" rows="3" placeholder="Write main caption here... Hook your audience in the first line!" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-indigo-500 placeholder-slate-600"></textarea>
+    </div>
+  </div>
+
+  <!-- Right Column: Per-Platform Customization & Hashtags -->
+  <div class="lg:col-span-7 flex flex-col justify-between">
+    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex-1">
+      <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
+        <div>
+          <h3 class="text-xs font-semibold text-slate-300 uppercase">3. Platform Specific Captions & Hashtags</h3>
+          <p class="text-[11px] text-slate-500">Tailor hashtags and text for platform algorithms</p>
+        </div>
+      </div>
+
+      <!-- Platform Tabs -->
+      <div class="flex gap-1.5 mb-4 overflow-x-auto pb-1" id="platformTabs">
+        {% for plat in supported_platforms %}
+        <button type="button" onclick="switchPlatformTab('{{ plat }}')" id="tab-btn-{{ plat }}" class="platform-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition border border-transparent {% if loop.first %}bg-indigo-600 text-white border-indigo-500{% else %}bg-slate-800/60 text-slate-400 hover:text-white{% endif %}">
+          {% if plat == 'instagram' %}<i class="fa-brands fa-instagram text-pink-400"></i>
+          {% elif plat == 'tiktok' %}<i class="fa-brands fa-tiktok text-cyan-300"></i>
+          {% elif plat == 'facebook' %}<i class="fa-brands fa-facebook text-blue-400"></i>
+          {% elif plat == 'threads' %}<i class="fa-brands fa-threads text-white"></i>
+          {% elif plat == 'twitter' %}<i class="fa-brands fa-x-twitter text-slate-300"></i>
+          {% endif %}
+          <span class="capitalize">{{ plat }}</span>
+        </button>
+        {% endfor %}
+      </div>
+
+      <!-- Tab Content Panels -->
+      <div id="tabPanels">
+        {% for plat in supported_platforms %}
+        <div id="panel-{{ plat }}" class="platform-panel space-y-3 {% if not loop.first %}hidden{% endif %}">
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-xs font-medium text-slate-300 capitalize">{{ plat }} Caption Override <span class="text-slate-500">(Optional)</span></label>
+              {% if plat == 'twitter' %}
+              <span id="xCharCounter" class="text-[10px] text-slate-400 font-mono">0 / 280</span>
+              {% endif %}
+            </div>
+            <textarea id="caption-{{ plat }}" rows="2" placeholder="Leave empty to use Master Caption..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-xs focus:outline-none focus:border-indigo-500 placeholder-slate-600"></textarea>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-xs font-medium text-slate-300 capitalize">{{ plat }} Hashtags</label>
+              <span class="text-[10px] text-slate-500">Space or comma separated</span>
+            </div>
+            <input type="text" id="hashtags-{{ plat }}" placeholder="{% if plat == 'instagram' %}#reels #reelsinstagram #viral #trending{% elif plat == 'tiktok' %}#fyp #foryou #viral #tiktokgrowth{% elif plat == 'twitter' %}#tech #ai #buildinpublic{% else %}#content #media #social{% endif %}" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-xs focus:outline-none focus:border-indigo-500 placeholder-slate-600">
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- One-Click Publish Button -->
+    <div class="mt-4 pt-2">
+      <button id="publishBtn" onclick="triggerOneClickPublish()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500 hover:from-indigo-600 hover:via-purple-700 hover:to-pink-600 text-white font-bold text-sm tracking-wide shadow-xl shadow-purple-600/25 flex items-center justify-center gap-2 transition duration-200 transform active:scale-[0.99]">
+        <i class="fa-solid fa-paper-plane text-base" id="publishIcon"></i>
+        <span id="publishText">Publish to All Connected Accounts in One Click</span>
+        <div id="publishSpinner" class="hidden h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+      </button>
+    </div>
+  </div>
+</div>
+

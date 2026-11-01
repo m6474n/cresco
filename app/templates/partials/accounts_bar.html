@@ -1,0 +1,63 @@
+<div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 mb-6">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+    <div>
+      <h2 class="text-sm font-semibold text-slate-200">Connected Accounts</h2>
+      <p class="text-xs text-slate-400">Posts will simultaneously publish to all enabled platforms</p>
+    </div>
+    <div class="flex items-center gap-2">
+      {% if simulation_mode %}
+      <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+        <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        API Simulation Mode Active
+      </span>
+      {% endif %}
+      <button onclick="openConnectModal()" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-plus text-[10px]"></i> Connect Platform
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+    {% for plat in supported_platforms %}
+      {% set acc = connected_platforms.get(plat) %}
+      <div class="border rounded-xl p-3 flex flex-col justify-between transition-all {% if acc and acc.is_active %}bg-slate-800/80 border-indigo-500/40 ring-1 ring-indigo-500/20{% elif acc %}bg-slate-900/40 border-slate-800 opacity-60{% else %}bg-slate-900/20 border-dashed border-slate-800{% endif %}">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            {% if plat == 'instagram' %}<i class="fa-brands fa-instagram text-pink-500 text-base"></i>
+            {% elif plat == 'tiktok' %}<i class="fa-brands fa-tiktok text-cyan-400 text-base"></i>
+            {% elif plat == 'facebook' %}<i class="fa-brands fa-facebook text-blue-500 text-base"></i>
+            {% elif plat == 'threads' %}<i class="fa-brands fa-threads text-white text-base"></i>
+            {% elif plat == 'twitter' %}<i class="fa-brands fa-x-twitter text-slate-200 text-base"></i>
+            {% endif %}
+            <span class="text-xs font-semibold capitalize text-slate-200">{{ plat }}</span>
+          </div>
+          {% if acc %}
+          <form method="POST" action="{{ url_for('accounts.toggle', account_id=acc.id) }}">
+            <button type="submit" title="Toggle active status" class="text-[10px] px-2 py-0.5 rounded-full font-medium {% if acc.is_active %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/30{% else %}bg-slate-800 text-slate-400{% endif %}">
+              {{ 'Active' if acc.is_active else 'Off' }}
+            </button>
+          </form>
+          {% endif %}
+        </div>
+
+        <div>
+          {% if acc %}
+            <div class="text-xs font-mono text-slate-300 truncate mb-2">{{ acc.account_name }}</div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-800/60">
+              <span class="text-emerald-400 text-[10px]"><i class="fa-solid fa-check"></i> Connected</span>
+              <form method="POST" action="{{ url_for('accounts.disconnect', account_id=acc.id) }}" onsubmit="return confirm('Disconnect {{ plat }}?');">
+                <button type="submit" class="hover:text-rose-400"><i class="fa-regular fa-trash-can"></i></button>
+              </form>
+            </div>
+          {% else %}
+            <p class="text-[11px] text-slate-500 mb-2">Not connected</p>
+            <a href="{{ url_for('oauth.authorize', platform=plat) }}" class="w-full text-center block text-[11px] text-indigo-400 hover:text-indigo-300 font-medium py-1 rounded bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20">
+              <i class="fa-solid fa-link text-[10px] mr-1"></i> OAuth Connect
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
