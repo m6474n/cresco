@@ -4,7 +4,10 @@ from fastapi.templating import Jinja2Templates
 from app.flash import get_flashed_messages as _get_flashed_messages
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
-templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+templates = Jinja2Templates(
+    directory=str(TEMPLATES_DIR),
+    context_processors=[lambda req: {"session": getattr(req, "session", {})}]
+)
 
 
 def url_for_compat(name: str, **kwargs) -> str:
